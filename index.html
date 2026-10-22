@@ -285,8 +285,8 @@
     .entry-overlay, .worker-overlay { position: fixed; inset: 0; z-index: 160; overflow: auto; background: var(--page); }
     .entry-logo-bar { position: relative; display: flex; align-items: center; justify-content: center; padding: 0; background: #000; }
     .entry-location { position: absolute; top: 12px; left: 16px; z-index: 2; color: var(--gold); font-size: 13px; font-weight: 900; letter-spacing: .08em; text-shadow: 0 1px 6px rgba(0,0,0,.6); }
-    .entry-logo-primary { display: block; width: 100%; height: auto; max-height: min(60vh, 640px); object-fit: contain; }
-    .entry-shell { min-height: calc(100vh - min(60vh, 640px)); display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(360px, .95fr); }
+    .entry-logo-primary { display: block; width: 100%; height: auto; max-height: min(76vh, 860px); object-fit: contain; }
+    .entry-shell { min-height: calc(100vh - min(76vh, 860px)); display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(360px, .95fr); }
     .entry-story { position: relative; overflow: hidden; min-height: 100vh; padding: clamp(44px, 8vw, 100px); display: flex; flex-direction: column; justify-content: flex-end; background: #14070c; color: #fff; }
     .entry-story::before { content: ""; position: absolute; width: min(58vw, 640px); aspect-ratio: 1; right: -22%; bottom: -24%; border: clamp(32px, 5vw, 72px) solid rgba(255,198,39,.15); border-radius: 50%; }
     .entry-story > * { position: relative; z-index: 1; }
@@ -299,21 +299,20 @@
     .entry-welcome h1 { margin: 0; font-size: clamp(54px, 11.5vw, 124px); line-height: .95; letter-spacing: -.06em; font-weight: 900; }
     .entry-welcome .welcome-line { display: block; }
     .entry-welcome .welcome-devil { color: #8C1D40; }
-    .sundevil-ticker { overflow: hidden; background: #ffc627; color: #8C1D40; padding: 10px 0; }
-    .sundevil-ticker-track { display: flex; width: max-content; animation: sundevil-scroll 28s linear infinite; will-change: transform; }
+    .sundevil-ticker { overflow: hidden; background: #ffc627; color: #8C1D40; padding: 5px 0; }
+    .sundevil-ticker-track { display: flex; width: max-content; animation: sundevil-scroll 58s linear infinite; will-change: transform; }
     .sundevil-ticker:hover .sundevil-ticker-track, .sundevil-ticker:active .sundevil-ticker-track { animation-play-state: paused; }
     .sundevil-ticker-group { display: flex; align-items: center; flex: 0 0 auto; }
-    .sundevil-ticker-item { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 20px; padding: 0 10px 0 20px; font-size: clamp(13px, 2.6vw, 16px); font-weight: 900; letter-spacing: .045em; text-transform: uppercase; white-space: nowrap; color: #8C1D40; }
+    .sundevil-ticker-item { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 20px; padding: 0 10px 0 20px; font-size: clamp(12px, 2.2vw, 14px); font-weight: 900; letter-spacing: .045em; text-transform: uppercase; white-space: nowrap; color: #8C1D40; }
     .sundevil-ticker-item::after { content: "◆"; font-size: 8px; color: #8C1D40; }
     @keyframes sundevil-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
     @media (prefers-reduced-motion: reduce) { .sundevil-ticker-track { animation: none; } }
     .entry-welcome .welcome-dash { color: var(--gold); }
     .entry-story p { max-width: 620px; margin: 0; color: #efe2e7; font-size: clamp(17px, 2vw, 22px); }
-    .entry-roles { position: relative; overflow: hidden; min-height: 100vh; padding: clamp(32px, 6vw, 76px); display: flex; flex-direction: column; justify-content: center; background: #2b000f; border-left: 3px solid var(--gold); border-right: 3px solid var(--gold); }
-    .entry-roles::after { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: .1; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 200'%3E%3Cpath d='M20 14 V50 C20 70 34 82 50 82 C66 82 80 70 80 50 V14' fill='none' stroke='%23ffc627' stroke-width='7' stroke-linecap='round'/%3E%3Cpath d='M50 14 V188' fill='none' stroke='%23ffc627' stroke-width='7' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: center; background-size: auto 72%; }
-    .entry-roles > * { position: relative; z-index: 1; }
-    .entry-roles h2 { margin-bottom: 8px; font-size: clamp(30px, 4vw, 46px); letter-spacing: -.05em; color: #fff; }
-    .entry-roles > p { margin-bottom: 28px; color: #ead9df; }
+    .entry-roles { position: relative; min-height: 100vh; padding: clamp(32px, 6vw, 76px); display: flex; flex-direction: column; justify-content: center; background: #fff; }
+    .entry-roles h2 { margin-bottom: 10px; font-size: clamp(38px, 5.2vw, 58px); line-height: 1.04; letter-spacing: -.045em; font-weight: 900; color: #8C1D40; text-align: center; }
+    .entry-roles h2 .role-dash { color: var(--gold); }
+    .entry-roles > p { margin-bottom: 28px; color: var(--muted); }
     .role-stack { display: grid; gap: 14px; }
     .role-card { position: relative; overflow: hidden; min-height: 154px; padding: 24px; border: 1px solid transparent; border-radius: 26px; background: var(--maroon-950); color: #fff; text-align: left; cursor: pointer; box-shadow: var(--shadow-soft); }
     .role-card.worker { background: var(--maroon-950); color: #fff; border-color: transparent; }
@@ -323,7 +322,7 @@
     .role-card span { display: block; max-width: 390px; color: #f1e4e9; font-size: 13px; }
     .role-card.worker span { color: #f1e4e9; }
     .role-card b { position: absolute; right: 22px; top: 22px; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: var(--gold); color: #4a0a20; }
-    .entry-foot { margin: 22px 0 0; color: #d8bfc8; font-size: 11px; }
+    .entry-foot { margin: 22px 0 0; color: var(--muted); font-size: 11px; }
 
     .worker-brand-lockup { width: 100%; overflow: hidden; background: #000; box-shadow: 0 16px 30px rgba(28, 4, 13, .2); }
     .worker-brand-logo { display: block; width: min(100%, 1160px); height: auto; margin: 0 auto; }
@@ -746,7 +745,7 @@
         <div><p>One local app for rides, deliveries, errands, home help, and just about any task. Customers ask. Devil Dashers choose the work, set their fee, and get it done.</p></div>
       </section>
       <section class="entry-roles" aria-labelledby="role-title">
-        <h2 id="role-title">How are you using Devil Dash?</h2>
+        <h2 id="role-title">How are you using Devil <span class="role-dash">Dash?</span></h2>
         <p>Choose a side now. You can switch later from Account.</p>
         <div class="role-stack">
           <button class="role-card" id="enter-customer"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-5 3.5-7 8-7s7.2 2 8 7"/></svg><strong>I'm a customer</strong><span>Request a ride, delivery, errand, project, or custom task.</span><b>→</b></button>
