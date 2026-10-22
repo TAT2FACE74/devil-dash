@@ -565,7 +565,7 @@
       *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
     }
   </style>
-</head>
+<link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="icon" type="image/x-icon" href="/favicon.ico"></head>
 <body>
   <div class="app">
     <main>
@@ -1218,5 +1218,5 @@
       var toastTimer; function showToast(message){var t=document.getElementById('toast');t.textContent=message;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove('show');},2200);} document.addEventListener('click',function(e){var b=e.target.closest('[data-message]');if(b)showToast(b.dataset.message);}); document.querySelectorAll('[data-refresh]').forEach(function(b){b.addEventListener('click',function(){showToast('Refreshed');});});
     })();
   </script>
-</body>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){})});}</script></body>
 </html>
