@@ -62,6 +62,7 @@
       <div class="row"><span>Dasher fee</span><span id="bdFee">$0.00</span></div>
       <div class="row"><span>Devil Dash service fee</span><span id="bdService">$3.00</span></div>
       <div class="row total"><span>Total due</span><span id="bdTotal">$3.00</span></div>
+      <div class="hint">Service fee: $3.00 flat on jobs up to $37.50 — 8% on bigger jobs. Your dasher keeps 100% of their fee. Devil Dash holds your payment until you confirm you&rsquo;re satisfied with the job.</div>
     </div>
 
     <button type="submit" id="payBtn">Pay by card</button>
@@ -77,7 +78,13 @@
 
 <script>
 (function () {
-  var SERVICE_FEE_CENTS = 300; // display mirror — the server is authoritative (api/create-checkout.js)
+  // Display mirror — the server is authoritative (api/create-checkout.js).
+  // Devil Dash service fee (Chad, 2026-11-06): $3.00 flat on jobs up to
+  // $37.50; 8% of the dasher fee on jobs above that — whichever is greater.
+  var FLAT_FEE_CENTS = 300;
+  function serviceFeeCents(dasherFeeCents) {
+    return Math.max(FLAT_FEE_CENTS, Math.round(dasherFeeCents * 0.08));
+  }
   var params = new URLSearchParams(location.search);
   var notice = document.getElementById('notice');
   var form = document.getElementById('payForm');
@@ -114,8 +121,8 @@
     var feeCents = Math.round(parseFloat(feeInput.value || '0') * 100);
     if (!isFinite(feeCents) || feeCents < 0) feeCents = 0;
     document.getElementById('bdFee').textContent = money(feeCents);
-    document.getElementById('bdService').textContent = money(SERVICE_FEE_CENTS);
-    document.getElementById('bdTotal').textContent = money(feeCents + SERVICE_FEE_CENTS);
+    document.getElementById('bdService').textContent = money(serviceFeeCents(feeCents));
+    document.getElementById('bdTotal').textContent = money(feeCents + serviceFeeCents(feeCents));
   }
   feeInput.addEventListener('input', updateBreakdown);
   updateBreakdown();
