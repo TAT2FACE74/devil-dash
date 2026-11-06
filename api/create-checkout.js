@@ -3,10 +3,12 @@
  *
  * Creates a Stripe Checkout Session for one agreed job.
  *
- * Pay model (locked by Chad, 2026-10-23):
+ * Pay model (locked by Chad, 2026-10-23; fee model updated by Chad, 2026-11-06):
  *   - The dasher sets their fee and keeps 100% of it.
- *   - The customer pays dasher fee + a FLAT Devil Dash service fee.
- *   - Service fee = SERVICE_FEE_CENTS (single source of truth — change here only).
+ *   - The customer pays dasher fee + the Devil Dash service fee.
+ *   - Service fee = the GREATER of a flat $3.00 or 8% of the dasher fee
+ *     (the $3.00 flat covers every job up to $37.50; 8% takes over above it).
+ *   - serviceFeeFor() below is the single source of truth — change here only.
  *
  * Money goes to Chad's Stripe account (acct_1TsHBeCXK9iNU3DY, "Crown Cartel").
  * Dasher payouts are handled by Chad in v1 (same as the text-in flow);
@@ -20,7 +22,12 @@
  * so the GitHub-upload deploy pipeline needs no package.json / build step.
  */
 
-const SERVICE_FEE_CENTS = 300; // FLAT $3.00 Devil Dash service fee on every order.
+const FLAT_FEE_CENTS = 300; // $3.00 flat floor for the Devil Dash service fee.
+// Greater-of fee model (Chad, 2026-11-06): flat $3.00 up to a $37.50 job,
+// 8% of the dasher fee above that. Returns integer cents.
+function serviceFeeFor(dasherFeeCents) {
+  return Math.max(FLAT_FEE_CENTS, Math.round(dasherFeeCents * 0.08));
+}
 const SITE_ORIGIN = process.env.SITE_ORIGIN || 'https://devil-dash-tat2face.vercel.app';
 const MIN_DASHER_FEE_CENTS = 100;      // $1.00 floor — below this a card charge makes no sense
 const MAX_DASHER_FEE_CENTS = 100000;   // $1,000.00 sanity ceiling for a single local job
@@ -103,7 +110,7 @@ module.exports = async function handler(req, res) {
     return sendJson(res, 400, { error: 'validation_failed', details: errors });
   }
 
-  const serviceFeeCents = SERVICE_FEE_CENTS;
+  const serviceFeeCents = serviceFeeFor(dasherFeeCents);
   const totalCents = dasherFeeCents + serviceFeeCents;
   const jobLabel = summary || `Devil Dash job ${jobRef}`;
 
@@ -131,7 +138,7 @@ module.exports = async function handler(req, res) {
           unit_amount: serviceFeeCents,
           product_data: {
             name: 'Devil Dash service fee',
-            description: 'Flat $3.00 platform fee.'
+            description: 'Devil Dash service fee — $3.00 flat on jobs up to $37.50, 8% on jobs over $37.50.'
           }
         }
       }
@@ -184,4 +191,4 @@ module.exports = async function handler(req, res) {
 };
 
 // Exported for local unit tests; ignored by Vercel.
-module.exports._internals = { SERVICE_FEE_CENTS, validate, encodeForm };
+module.exports._internals = { FLAT_FEE_CENTS, serviceFeeFor, validate, encodeForm };
