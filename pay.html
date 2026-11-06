@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pay by Card — Devil Dash</title>
+<meta name="theme-color" content="#490818">
+<link rel="icon" href="/favicon.ico">
+<style>
+  :root { --maroon:#490818; --maroon2:#8C1D40; --gold:#E5B95F; --ink:#171216; --paper:#FFF9F2; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: Georgia, 'Times New Roman', serif; background:var(--maroon); color:var(--ink); }
+  .wrap { max-width:520px; margin:0 auto; padding:24px 18px 48px; }
+  header { text-align:center; color:#fff; margin:10px 0 20px; }
+  header img { width:84px; height:84px; border-radius:18px; }
+  header h1 { margin:10px 0 2px; font-size:30px; letter-spacing:.5px; }
+  header h1 .gold { color:var(--gold); }
+  header p { margin:0; color:#F3D9A4; font-style:italic; font-size:15px; }
+  .card { background:var(--paper); border-radius:16px; padding:22px 20px; box-shadow:0 10px 30px rgba(0,0,0,.35); border-top:5px solid var(--gold); }
+  label { display:block; font-weight:bold; margin:14px 0 6px; font-size:15px; }
+  label:first-child { margin-top:0; }
+  input, textarea { width:100%; padding:12px; border:1.5px solid #CBB; border-radius:10px; font-size:16px; font-family:inherit; background:#fff; }
+  .hint { font-size:13px; color:#6B5560; margin-top:4px; }
+  .breakdown { margin:20px 0 6px; border-top:1.5px dashed #C9A86A; padding-top:14px; font-size:16px; }
+  .breakdown .row { display:flex; justify-content:space-between; padding:3px 0; }
+  .breakdown .total { font-weight:bold; font-size:19px; border-top:1.5px solid #C9A86A; margin-top:8px; padding-top:10px; }
+  button { width:100%; margin-top:16px; padding:15px; font-size:18px; font-weight:bold; font-family:inherit;
+           color:#fff; background:var(--maroon2); border:none; border-radius:12px; cursor:pointer; }
+  button:disabled { opacity:.55; cursor:wait; }
+  .alt { text-align:center; margin-top:18px; font-size:15px; color:#4A3540; }
+  .alt a { color:var(--maroon2); font-weight:bold; }
+  .notice { border-radius:12px; padding:16px; margin-bottom:18px; font-size:16px; line-height:1.45; }
+  .notice.success { background:#EAF7EA; border:1.5px solid #5FA463; }
+  .notice.cancelled { background:#FDF3E3; border:1.5px solid #D9A441; }
+  .notice.error { background:#FBEAEA; border:1.5px solid #C05B5B; }
+  footer { text-align:center; color:#D8B98A; font-size:13px; margin-top:26px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="/icon-512.png" alt="Devil Dash logo">
+    <h1>Devil <span class="gold">Dash</span></h1>
+    <p>Pay by card for your Dash</p>
+  </header>
+
+  <div id="notice"></div>
+
+  <form class="card" id="payForm">
+    <label for="jobRef">Job reference</label>
+    <input id="jobRef" name="jobRef" type="text" maxlength="64" placeholder="e.g. DD-1024-001" required>
+    <div class="hint">Chad included this in his text — it ties your payment to your job.</div>
+
+    <label for="summary">What&rsquo;s the job?</label>
+    <textarea id="summary" name="summary" rows="2" maxlength="300" placeholder="e.g. Ride to Mountain America Stadium, 2 people"></textarea>
+
+    <label for="fee">Agreed dasher fee (USD)</label>
+    <input id="fee" name="fee" type="number" min="1" max="1000" step="0.01" inputmode="decimal" placeholder="e.g. 25.00" required>
+    <div class="hint">The price your dasher quoted you. Your dasher keeps 100% of this fee.</div>
+
+    <div class="breakdown">
+      <div class="row"><span>Dasher fee</span><span id="bdFee">$0.00</span></div>
+      <div class="row"><span>Devil Dash service fee</span><span id="bdService">$3.00</span></div>
+      <div class="row total"><span>Total due</span><span id="bdTotal">$3.00</span></div>
+    </div>
+
+    <button type="submit" id="payBtn">Pay by card</button>
+
+    <div class="alt">
+      Rather pay another way? Cash App, PayPal, Zelle &amp; Venmo still work —<br>
+      text <a href="sms:6025000246">602-500-0246</a> and we&rsquo;ll sort it out.
+    </div>
+  </form>
+
+  <footer>Devil Dash &middot; Tempe, Arizona &middot; You ask. A Dasher gets it done.</footer>
+</div>
+
+<script>
+(function () {
+  var SERVICE_FEE_CENTS = 300; // display mirror — the server is authoritative (api/create-checkout.js)
+  var params = new URLSearchParams(location.search);
+  var notice = document.getElementById('notice');
+  var form = document.getElementById('payForm');
+  var refInput = document.getElementById('jobRef');
+  var summaryInput = document.getElementById('summary');
+  var feeInput = document.getElementById('fee');
+
+  function money(cents) { return '$' + (cents / 100).toFixed(2); }
+
+  function showNotice(kind, html) {
+    notice.innerHTML = '<div class="notice ' + kind + '">' + html + '</div>';
+  }
+
+  // Prefill from the link Chad texts the customer: pay.html?ref=...&fee=...&summary=...
+  if (params.get('ref')) refInput.value = params.get('ref');
+  if (params.get('summary')) summaryInput.value = params.get('summary');
+  if (params.get('fee')) feeInput.value = params.get('fee');
+
+  // Return states from Stripe Checkout.
+  var status = params.get('status');
+  if (status === 'success') {
+    showNotice('success',
+      '<strong>Payment received — thank you!</strong><br>' +
+      'Your Dash is paid' + (params.get('ref') ? ' (job ' + params.get('ref') + ')' : '') +
+      '. Keep your texts open — your dasher will confirm from 602-500-0246.');
+    form.style.display = 'none';
+  } else if (status === 'cancelled') {
+    showNotice('cancelled',
+      '<strong>No payment was taken.</strong> You closed the card payment before finishing. ' +
+      'You can try again below, or text <a href="sms:6025000246">602-500-0246</a> to pay another way.');
+  }
+
+  function updateBreakdown() {
+    var feeCents = Math.round(parseFloat(feeInput.value || '0') * 100);
+    if (!isFinite(feeCents) || feeCents < 0) feeCents = 0;
+    document.getElementById('bdFee').textContent = money(feeCents);
+    document.getElementById('bdService').textContent = money(SERVICE_FEE_CENTS);
+    document.getElementById('bdTotal').textContent = money(feeCents + SERVICE_FEE_CENTS);
+  }
+  feeInput.addEventListener('input', updateBreakdown);
+  updateBreakdown();
+
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var btn = document.getElementById('payBtn');
+    var feeCents = Math.round(parseFloat(feeInput.value || '0') * 100);
+    if (!refInput.value.trim()) { showNotice('error', 'Please enter your job reference from Chad&rsquo;s text.'); return; }
+    if (!isFinite(feeCents) || feeCents < 100) { showNotice('error', 'Please enter the agreed dasher fee (at least $1.00).'); return; }
+    btn.disabled = true;
+    btn.textContent = 'Opening secure checkout…';
+    fetch('/api/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jobRef: refInput.value.trim(),
+        summary: summaryInput.value.trim(),
+        dasherFeeCents: feeCents
+      })
+    }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (res) {
+        if (res.ok && res.j.url) { location.href = res.j.url; return; }
+        btn.disabled = false;
+        btn.textContent = 'Pay by card';
+        if (res.j && res.j.error === 'stripe_not_configured') {
+          showNotice('cancelled',
+            '<strong>Card payments are being switched on.</strong> Please text ' +
+            '<a href="sms:6025000246">602-500-0246</a> and Chad will take your payment another way for this job.');
+        } else {
+          showNotice('error', '<strong>Something went wrong starting the payment.</strong> ' +
+            ((res.j && res.j.message) ? res.j.message + ' ' : '') +
+            'You have NOT been charged. Text 602-500-0246 for help.');
+        }
+      })
+      .catch(function () {
+        btn.disabled = false;
+        btn.textContent = 'Pay by card';
+        showNotice('error', '<strong>Could not reach the payment service.</strong> You have NOT been charged. Check your connection or text 602-500-0246.');
+      });
+  });
+})();
+</script>
+</body>
+</html>
